@@ -1,0 +1,106 @@
+Cairo Branch
+============
+
+**NOTE**: There is now a standalone Cairo buildpack that should be used
+instead of this: https://github.com/mojodna/heroku-buildpack-cairo
+
+This is mojodna's branch of bloomtime's branch of [Heroku's official node.js
+buildpack](https://github.com/heroku/heroku-buildpack-nodejs).
+
+We've added `cairo`, `pixman`, and `freetype` to the `vendor` folder so you can
+run [`node-canvas`](https://github.com/LearnBoost/node-canvas) on
+[Heroku](http://heroku.com/).
+
+Simply do `heroku config:add
+BUILDPACK_URL=git://github.com/mojodna/heroku-buildpack-nodejs.git#cairo` and
+push as normal.
+
+[vulcan issue 20](https://github.com/heroku/vulcan/issues/20) contains
+information about how to build the binaries (more or less). Cairo was built by
+hand by using `heroku run bash`, as I couldn't get `vulcan` to correctly use the
+`pixman` and `freetype` dependencies when building.  `pixman` and `freetype`
+were manually placed in `/app/vendor` and added to `CPATH`, `CPPATH`, and
+`LIBRARY_PATH`.
+
+See [Heroku's
+Devcenter](https://devcenter.heroku.com/articles/buildpack-binaries) for how to
+create your own custom buildpack.
+
+Credits: @bloomtime, @mojodna
+
+
+Heroku buildpack: Node.js
+=========================
+
+This is a [Heroku buildpack](http://devcenter.heroku.com/articles/buildpacks) for Node.js apps.
+It uses [NPM](http://npmjs.org/) and [SCons](http://www.scons.org/).
+
+Usage
+-----
+
+Example usage:
+
+    $ ls
+    Procfile  package.json  web.js
+
+    $ heroku create --buildpack http://github.com/heroku/heroku-buildpack-nodejs.git
+
+    $ git push heroku master
+    ...
+    -----> Heroku receiving push
+    -----> Fetching custom buildpack
+    -----> Node.js app detected
+    -----> Vendoring node 0.4.7
+    -----> Installing dependencies with npm 1.0.8
+           express@2.1.0 ./node_modules/express
+           ├── mime@1.2.2
+           ├── qs@0.3.1
+           └── connect@1.6.2
+           Dependencies installed
+
+The buildpack will detect your app as Node.js if it has the file `package.json` in the root.  It will use NPM to install your dependencies, and vendors a version of the Node.js runtime into your slug.  The `node_modules` directory will be cached between builds to allow for faster NPM install time.
+
+Node.js and npm versions
+------------------------
+
+You can specify the versions of Node.js and npm your application requires using `package.json`
+
+    {
+      "name": "myapp",
+      "version": "0.0.1",
+      "engines": {
+        "node": ">=0.4.7 <0.7.0",
+        "npm": ">=1.0.0"
+      }
+    }
+
+To list the available versions of Node.js and npm, see these manifests:
+
+http://heroku-buildpack-nodejs.s3.amazonaws.com/manifest.nodejs
+http://heroku-buildpack-nodejs.s3.amazonaws.com/manifest.npm
+
+Contributing
+------------
+
+To use this buildpack, fork it on Github. Push up changes to your fork, then create a test app with `--buildpack <your-github-url>` and push to it.
+
+To change the vendored binaries for Node.js, NPM, and SCons, use the helper scripts in the `support/` subdirectory.  You'll need an S3-enabled AWS account and a bucket to store your binaries in.
+
+For example, you can change the default version of Node.js to v0.6.7.
+
+First you'll need to build a Heroku-compatible version of Node.js:
+
+    $ export AWS_ID=xxx AWS_SECRET=yyy S3_BUCKET=zzz
+    $ s3 create $S3_BUCKET
+    $ support/package_nodejs 0.6.7
+
+Open `bin/compile` in your editor, and change the following lines:
+
+    DEFAULT_NODE_VERSION="0.6.7"
+    S3_BUCKET=zzz
+
+Commit and push the changes to your buildpack to your Github fork, then push your sample app to Heroku to test.  You should see:
+
+    -----> Vendoring node 0.6.7
+
+For more info, see [CONTRIBUTING.md](CONTRIBUTING.md)
