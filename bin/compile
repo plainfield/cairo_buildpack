@@ -41,13 +41,9 @@ function indent() {
 
 function run_npm() {
   command="$1"
-  
-  echo "$command"
 
   cd $BUILD_DIR
   HOME="$BUILD_DIR" $VENDORED_NODE/bin/node $VENDORED_NPM/cli.js $command 2>&1 | indent
-  
-  status "npm command done."
 
   if [ "${PIPESTATUS[*]}" != "0 0" ]; then
     echo " !     Failed to $command dependencies with npm"
@@ -217,7 +213,8 @@ echo "## buildpack.                                        ##" | indent
 echo "##                                                   ##" | indent
 echo "## It also includes updated versions.                ##" | indent
 echo "##                                                   ##" | indent
-echo "##        Cheers,Seth                                ##" | indent
+echo "##        Cheers,                                    ##" | indent
+echo "##          Seth                                     ##" | indent
 echo "#######################################################" | indent
 echo
 
